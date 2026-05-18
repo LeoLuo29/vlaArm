@@ -1,19 +1,16 @@
+import RPi.GPIO as GPIO
+import time
 
 ## constants
 SERVO1_PIN = 18
 
 
 
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-
-
-
-class Servo:
+class SG92R:
     def __init__(self,pinNum,):
         self.pinNum = pinNum
-        GPIO.setup(pinNUm, GPIO.OUT)
-        self.pwm = GPIO.PWM(SERVO_PIN, 50)
+        GPIO.setup(self.pinNum, GPIO.OUT)
+        self.pwm = GPIO.PWM(self.pinNum, 50)
         self.pwm.start(0)
         self.angle = 90
         self.duty = 2.5 + (self.angle / 180) * 9.5
@@ -30,4 +27,19 @@ class Servo:
 
 
 
-    ## servo module; run in the mainloop
+## servo module; run in the mainloop
+class Mod_SG92R:
+    def __init__(self):
+        self.servo1 = SG92R(pinNum = 18)
+    
+
+    def onRun(self, state = False):
+        if state == False:
+            return
+        
+        self.servo1.set_angle(90)
+        time.sleep(1)
+        self.servo1.set_angle(180)
+        time.sleep(1)
+        
+
