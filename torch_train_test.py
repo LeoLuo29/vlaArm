@@ -17,11 +17,8 @@ from torchvision import datasets
 from torchvision.transforms import ToTensor
 from torchvision.io import decode_image
 import numpy as np 
-import matplotlib.pyplot as plt
 from tempfile import TemporaryFile
 outfile = TemporaryFile()
-fig = plt.figure(figsize=(50, 50))
-ax = fig.add_subplot(111, projection='3d')
 from torch.utils.data import TensorDataset, DataLoader
 import torch.nn.utils.prune as prune
 

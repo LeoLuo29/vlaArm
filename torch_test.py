@@ -51,7 +51,7 @@ class Model_Test():
  
 
         ##load model from .tp file 
-        model = torch.load(self.model_name, weights_only=False)
+        model = torch.load(self.model_name, weights_only=False, map_location=torch.device('cpu'))
         y = model(data[97][0].unsqueeze(0)) 
         y_np = y[0].cpu().detach().numpy()  ## switching tensor back to np array
 
