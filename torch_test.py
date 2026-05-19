@@ -82,7 +82,7 @@ class Model_Test():
 
 
 ## argument format: "folder_name/file_name"
-MT = Model_Test("unet_nn_v2a_t.pt", "generated_inp_train2.npy", "generated_ans_train2.npy")
+MT = Model_Test("unet_nn_v2a_t.pt", "dataSets/generated_inp_train2.npy", "dataSets/generated_ans_train2.npy")
 
 
 

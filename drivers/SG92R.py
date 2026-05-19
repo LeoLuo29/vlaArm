@@ -15,10 +15,11 @@ class SG92R:
         self.angle = 90
         self.duty = 2.5 + (self.angle / 180) * 9.5
     
-    def set_angle(self,angle):
+    def set_angle(self,newAngle):
         ## Move servo to angle (0–180 degrees)
         # Map 0-180 degrees to 2.5–12% duty cycle
-        self.duty = 2.5 + (angle / 180) * 9.5
+        self.angle = newAngle
+        self.duty = 2.5 + (self.angle / 180) * 9.5
         self.pwm.ChangeDutyCycle(self.duty)
         time.sleep(0.3)  # Wait for servo to reach position
         self.pwm.ChangeDutyCycle(0)  # Stop sending signal (reduces jitter)
