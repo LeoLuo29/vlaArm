@@ -1,7 +1,8 @@
 
 import time
 import gpio_init
-import SG92R
+import drivers.SG92R
+import drivers.MG995
 
 
 
@@ -9,11 +10,11 @@ import SG92R
 
 ## welcomming message
 print("welcome to vlaArm mainloop")
-graber = SG92R.Mod_SG92R()
+graber = drivers.MG995.Mod_MG995(18)
 
 ##mainloop
 cntLoop = 0
 while True:
     print("________loop" + str(cntLoop) + "_______")
-    graber.onRun(state=True)
+    graber.onRun()
     cntLoop += 1
