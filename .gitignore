@@ -4,3 +4,5 @@ __pycache__/
 *.pyo
 .env
 Miniconda3-latest-Linux-aarch64.sh
+vision/dataSets/images/
+vision/dataSets/*.npy
