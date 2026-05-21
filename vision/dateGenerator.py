@@ -4,7 +4,7 @@ import bpy, csv, random, math, os
 DESKTOP     = os.path.join(os.path.expanduser('~'), 'Desktop')
 OUTPUT_DIR  = os.path.join(DESKTOP, 'dataset', 'images')
 TXT_PATH    = os.path.join(DESKTOP, 'dataset', 'labels.txt')
-NUM_SAMPLES = 3000
+NUM_SAMPLES = 7
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -71,6 +71,16 @@ Y_LIMIT     = HALF_H - HALF_EXTENT - MARGIN
 
 print(f"Placement limits    : X ±{X_LIMIT:.2f}  Y ±{Y_LIMIT:.2f}")
 
+# ── Blender camera projection matrix ───────────────────────────
+# Used to convert 3D world position → exact 2D pixel coordinate
+# This is the most accurate way to get center pixel from 3D center
+def world_to_pixel(scene, cam, world_pos):
+    from bpy_extras.object_utils import world_to_camera_view
+    co = world_to_camera_view(scene, cam, world_pos)
+    px = co.x * scene.render.resolution_x
+    py = (1.0 - co.y) * scene.render.resolution_y  # flip y: top-left origin
+    return round(px, 1), round(py, 1)
+
 with open(TXT_PATH, 'w') as f:
     f.write(f"{'Index':<8} {'Filename':<20} {'Shape':<12} {'Color':<10} {'X (px)':<10} {'Y (px)'}\n")
     f.write('-' * 72 + '\n')
@@ -88,15 +98,24 @@ with open(TXT_PATH, 'w') as f:
         SHAPES[label]()
         obj = bpy.context.active_object
 
-        # ── Random scale (1/3 of original) and rotation ─────────
+        # ── Random scale and rotation ───────────────────────────
         s = random.uniform(0.1, 0.233)
         obj.scale = (s, s, s)
         obj.rotation_euler = (0, 0, random.uniform(0, math.pi * 2))
 
+        # Apply scale so bounding box reflects true size
+        bpy.ops.object.transform_apply(scale=True)
+
+        # Set origin to geometry center so location = visual center
+        bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='BOUNDS')
+
         # ── Position guaranteed inside frame ────────────────────
         rx = random.uniform(-X_LIMIT, X_LIMIT)
         ry = random.uniform(-Y_LIMIT, Y_LIMIT)
-        obj.location = (rx, ry, 0)
+
+        # Raise object so it sits on the ground (z = half its height)
+        obj_height = obj.dimensions.z
+        obj.location = (rx, ry, obj_height / 2)
 
         # ── Random color with nodes (works in EEVEE render) ─────
         color_name, color_rgba = random.choice(list(COLORS.items()))
@@ -121,12 +140,13 @@ with open(TXT_PATH, 'w') as f:
         scene.render.filepath = os.path.join(OUTPUT_DIR, fname)
         bpy.ops.render.render(write_still=True)
 
-        # ── Pixel coords: (0,0) top-left, (640,360) bottom-right ─
-        px = (rx + HALF_W) / (2 * HALF_W) * 640
-        py = (1.0 - (ry + HALF_H) / (2 * HALF_H)) * 360
+        # ── Project 3D object center → exact pixel coordinate ───
+        # Uses Blender's own camera projection so tilt is accounted for
+        center_3d = obj.location
+        px, py = world_to_pixel(scene, cam, center_3d)
 
         # ── Write to .txt ────────────────────────────────────────
-        f.write(f"{i:<8} {fname:<20} {label:<12} {color_name:<10} {round(px, 1):<10} {round(py, 1)}\n")
-        f.flush()  # write immediately so file is readable mid-run
+        f.write(f"{i:<8} {fname:<20} {label:<12} {color_name:<10} {px:<10} {py}\n")
+        f.flush()
 
-        print(f"[{i+1}/{NUM_SAMPLES}] {label} ({color_name}) at ({px:.1f}, {py:.1f})")
+        print(f"[{i+1}/{NUM_SAMPLES}] {label} ({color_name}) at ({px}, {py})")
