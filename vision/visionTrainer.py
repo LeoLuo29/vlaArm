@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
 
-    epochs = 20
+    epochs = 40
     history = {"train_loss": [], "val_loss": [], "val_acc": []}
 
     for epoch in range(1, epochs + 1):
