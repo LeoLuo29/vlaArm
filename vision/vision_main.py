@@ -8,12 +8,12 @@ import torch
 import matplotlib.pyplot as plt
 from torchvision import transforms
 from PIL import Image
-from visionTrainer import ImageNet
+from visionTrainer import ImageNet, IMAGE_W, IMAGE_H  # noqa: F401 — ImageNet needed by torch.load pickle
 
 VISION_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(VISION_DIR, 'vision_model.pt')
+MODEL_PATH = os.path.join(VISION_DIR, 'vision_model_V2.pt')
 
-CLASS_NAMES = {0: "torus", 1: "cube", 2: "cylinder", 3: "cone", 4: "sphere"}
+CLASS_NAMES = { 0: "cube", 1: "cylinder", 2: "cone", 3: "sphere"}
 
 transform = transforms.Compose([
     transforms.ToTensor(),  # (H,W,3) uint8 → (3,H,W) float32 in [0,1]
@@ -21,7 +21,7 @@ transform = transforms.Compose([
 
 image_files = [
     os.path.join(VISION_DIR, 'img_00000.jpg'),
-    os.path.join(VISION_DIR, 'img_00038.jpg'),
+    os.path.join(VISION_DIR, 'IMG_9341.jpeg'),
     os.path.join(VISION_DIR, 'IMG_9342.jpeg'),
 ]
 
@@ -39,18 +39,28 @@ for ax, img_path in zip(axes, image_files):
     img_t   = transform(img_pil).unsqueeze(0).to(device)  # (1, 3, H, W)
 
     with torch.no_grad():
-        feat_maps = model.features(img_t)                    # (1, 256, H, W)
-        output    = model.classifier(torch.flatten(model.gap(feat_maps), 1))
-        probs     = output.exp().squeeze(0)                  # log-softmax → probabilities
-        class_idx = probs.argmax().item()
-        category  = CLASS_NAMES[class_idx]
+        feat_maps          = model.features(img_t)                       # (1, 256, H, W)
+        flat               = torch.flatten(model.gap(feat_maps), 1)      # (1, 256)
+        probs              = model.classifier(flat).exp().squeeze(0)     # log-softmax → probs
+        class_idx          = probs.argmax().item()
+        category           = CLASS_NAMES[class_idx]
+        if hasattr(model, 'regressor'):
+            reg  = model.regressor(flat).squeeze(0)
+            x_px = reg[0].item() * IMAGE_W
+            y_px = reg[1].item() * IMAGE_H
+        else:
+            x_px = y_px = None
 
-    print(f"{os.path.basename(img_path)} → {category}")
+    coord_str = f"  ({x_px:.1f}, {y_px:.1f}) px" if x_px is not None else ""
+    print(f"{os.path.basename(img_path)} → {category}{coord_str}")
     for idx, name in CLASS_NAMES.items():
         print(f"  {name:<10} {probs[idx].item() * 100:6.2f}%")
 
     ax.imshow(img_pil)
-    ax.set_title(category, fontsize=16)
+    if x_px is not None:
+        ax.plot(x_px, y_px, 'r+', markersize=18, markeredgewidth=2)
+    title = f"{category}  ({x_px:.0f}, {y_px:.0f}) px" if x_px is not None else category
+    ax.set_title(title, fontsize=14)
     ax.axis('off')
 
     # Plot first 32 feature channels (4×8 grid) after all conv layers
