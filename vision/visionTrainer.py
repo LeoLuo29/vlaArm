@@ -103,6 +103,8 @@ class ImageNet(nn.Module):
             nn.LogSoftmax(dim=1),  # use with NLLLoss
         )
 
+        ## this tracking regressor needs improvement. 
+        ## maybe other network structure 
         self.regressor = nn.Sequential(
             nn.Linear(256, 1024),
             nn.ReLU(),
