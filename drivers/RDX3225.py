@@ -18,6 +18,7 @@ class RDX3225:
     def _duty(self, angle):
         return 2.5 + (angle / self.max_angle) * 10.0
 
+
     def setAngle(self, angle):
         angle      = max(0, min(self.max_angle, angle))
         self.angle = angle
@@ -26,12 +27,21 @@ class RDX3225:
         self.pwm.ChangeDutyCycle(0)  # stop signal to reduce jitter
 
 
+    def returnMiddle(self):
+        self.setAngle(180)
+    
+
+    def returnDefault(self):
+        self.setAngle(0)
+
+
+
 class Mod_RDX3225:
     def __init__(self, pinNum):
         self.servo = RDX3225(pinNum)
 
     def onRun(self):
-        self.servo.setAngle(0)
+        self.servo.returnMiddle()
         time.sleep(1)
-        self.servo.setAngle(270)
+        self.servo.returnDefault()
         time.sleep(1)
