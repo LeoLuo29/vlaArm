@@ -42,16 +42,16 @@ class VisionDataset(Dataset):
             line = line.strip()
             if not line:
                 continue
-            _, filename, shape, color, x, y = line.split()
+            _, filename, shape, x, y = line.split()
             if shape not in SHAPE_CLASSES:
                 continue
-            self.samples.append((filename, shape, color, float(x), float(y)))
+            self.samples.append((filename, shape, float(x), float(y)))
 
     def __len__(self):
         return len(self.samples)
 
     def __getitem__(self, idx):
-        filename, shape, _, x, y = self.samples[idx]
+        filename, shape, x, y = self.samples[idx]
         img   = Image.open(os.path.join(IMAGES_DIR, filename)).convert('RGB')
         img_t = transform(img)                  # (3, 360, 640) float32
         label = SHAPE_CLASSES[shape]            # int 0–3
@@ -60,8 +60,8 @@ class VisionDataset(Dataset):
 
     def get_sample(self, idx):
         """Returns a VisionSample for visualization."""
-        filename, shape, color, x, y = self.samples[idx]
-        return VisionSample(filename, shape, color, x, y)
+        filename, shape, x, y = self.samples[idx]
+        return VisionSample(filename, shape, None, x, y)
 
 
 class ImageNet(nn.Module):
