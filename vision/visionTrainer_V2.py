@@ -15,7 +15,7 @@ from visionTrainer import VisionDataset, IMAGE_W, IMAGE_H
 VISION_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-class ImageNet(nn.Module):
+class ImageNetV2(nn.Module):
     def __init__(self, num_classes, freeze_features=True):
         super().__init__()
 
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_data, batch_size=16, shuffle=True)
     val_loader   = DataLoader(val_data,   batch_size=16)
 
-    model       = ImageNet(num_classes=4, freeze_features=True).to(device)
+    model       = ImageNetV2(num_classes=4, freeze_features=True).to(device)
     cls_loss_fn = nn.NLLLoss()
     reg_loss_fn = nn.MSELoss()
     lambda_reg  = 1.0
@@ -145,8 +145,8 @@ if __name__ == "__main__":
     model.unfreeze_features()
     run_phase(epochs=30, lr=1e-5, label="Phase 2 — full fine-tune")
 
-    torch.save(model, os.path.join(VISION_DIR, "vision_model_V3.pt"))
-    print("\nModel saved to vision_model_V3.pt")
+    torch.save(model, os.path.join(VISION_DIR, "vision_model_V2.pt"))
+    print("\nModel saved to vision_model_V2.pt")
 
     # Plot training curves with phase boundary marker
     ep         = range(1, len(history["train_loss"]) + 1)

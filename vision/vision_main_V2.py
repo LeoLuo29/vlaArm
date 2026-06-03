@@ -8,10 +8,11 @@ import torch
 import matplotlib.pyplot as plt
 from torchvision import transforms
 from PIL import Image
-from visionTrainer_V2 import ImageNet, IMAGE_W, IMAGE_H  # noqa: F401 — ImageNet needed by torch.load pickle
+from visionTrainer_V2 import ImageNetV2, IMAGE_W, IMAGE_H  # noqa: F401 — needed by torch.load pickle
+ImageNet = ImageNetV2  # noqa: F841 — allows torch.load to find old checkpoints saved as 'ImageNet'
 
 VISION_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(VISION_DIR, 'vision_model_V3.pt')
+MODEL_PATH = os.path.join(VISION_DIR, 'vision_model_V2.pt')
 
 CLASS_NAMES = { 0: "cube", 1: "cylinder", 2: "cone", 3: "sphere"}
 
