@@ -8,7 +8,7 @@ import torch
 import matplotlib.pyplot as plt
 from torchvision import transforms
 from PIL import Image
-from ImageNetTrainer import ImageNet, IMAGE_W, IMAGE_H  # noqa: F401 — ImageNet needed by torch.load pickle
+from visionTrainer_V2 import ImageNet, IMAGE_W, IMAGE_H  # noqa: F401 — ImageNet needed by torch.load pickle
 
 VISION_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(VISION_DIR, 'vision_model_V3.pt')
